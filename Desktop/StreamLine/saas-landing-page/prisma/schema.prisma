@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  accounts      Account[]
+  sessions      Session[]
+  userSettings  UserSettings?
+  drinks        Drink[]
+  ingredients   Ingredient[]
+  menus         Menu[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UserSettings {
+  id                String  @id @default(cuid())
+  userId            String  @unique
+  currency          String  @default("$")
+  taxRate           Float   @default(0.25)
+  defaultProfitMargin Float  @default(0.7)
+  theme             String  @default("light")
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Drink {
+  id                String   @id @default(cuid())
+  name              String
+  type              String
+  price             Float
+  cost              Float
+  profit            Float
+  active            Boolean  @default(true)
+  recipe            String
+  created           DateTime @default(now())
+  menuHistory       String
+  ice               String
+  style             String?
+  preparationMethod String?
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  menuItems         MenuDrink[]
+}
+
+model Ingredient {
+  id            String  @id @default(cuid())
+  name          String
+  category      String
+  producer      String?
+  subCategory   String?
+  costPerBottle Float
+  volume        Float
+  unit          String
+  costPerUnit   Float
+  isComplex     Boolean @default(false)
+  recipe        String?
+  userId        String
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Menu {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean    @default(false)
+  created     DateTime   @default(now())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  drinks      MenuDrink[]
+}
+
+model MenuDrink {
+  id      String @id @default(cuid())
+  menuId  String
+  drinkId String
+  menu    Menu   @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  drink   Drink  @relation(fields: [drinkId], references: [id], onDelete: Cascade)
+
+  @@unique([menuId, drinkId])
+}
+
