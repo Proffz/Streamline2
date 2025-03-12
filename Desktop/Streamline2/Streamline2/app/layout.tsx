@@ -5,13 +5,14 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { AppProvider } from "@/lib/store"
 import { SettingsProvider } from "@/lib/settings-context"
+import { AuthProvider } from "@/lib/auth-context"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "StreamLine Menu Calculator",
   description: "Pricing tool for bars and restaurants",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -24,15 +25,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <SettingsProvider>
           <AppProvider>
-            {children}
-            <Toaster />
+            <AuthProvider>
+              {children}
+              <Toaster />
+            </AuthProvider>
           </AppProvider>
         </SettingsProvider>
       </body>
     </html>
   )
 }
-
-
-
-import './globals.css'
